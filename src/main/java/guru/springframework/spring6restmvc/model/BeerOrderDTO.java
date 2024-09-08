@@ -1,6 +1,5 @@
-package guru.springframework.spring6restmvc.entities;
+package guru.springframework.spring6restmvc.model;
 
-import guru.springframework.spring6restmvc.model.CustomerDTO;
 import lombok.Builder;
 import lombok.Data;
 
