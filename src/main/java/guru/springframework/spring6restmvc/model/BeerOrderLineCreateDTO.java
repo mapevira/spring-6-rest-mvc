@@ -2,6 +2,8 @@ package guru.springframework.spring6restmvc.model;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
+import lombok.Data;
 
 import java.util.UUID;
 
@@ -12,6 +14,8 @@ import java.util.UUID;
  * @version 09/09/2024 - 13:03
  * @since jdk 1.21
  */
+@Data
+@Builder
 public class BeerOrderLineCreateDTO {
 
     @NotNull
