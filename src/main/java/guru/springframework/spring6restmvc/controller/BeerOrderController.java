@@ -4,6 +4,7 @@ import guru.springframework.spring6restmvc.entities.BeerOrder;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerOrderCreateDTO;
 import guru.springframework.spring6restmvc.model.BeerOrderDTO;
+import guru.springframework.spring6restmvc.model.BeerOrderUpdateDTO;
 import guru.springframework.spring6restmvc.services.BeerOrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,11 @@ public class BeerOrderController {
     public static final String BEER_ORDER_PATH_ID = BEER_ORDER_PATH + "/{beerOrderId}";
 
     private final BeerOrderService beerOrderService;
+
+    @PutMapping(BEER_ORDER_PATH_ID)
+    public ResponseEntity<BeerOrderDTO> updateOrder(@PathVariable final UUID beerOrderId, @RequestBody BeerOrderUpdateDTO beerOrderUpdatedDTO) {
+        return ResponseEntity.ok(beerOrderService.updateOrder(beerOrderId, beerOrderUpdatedDTO));
+    }
 
     @PostMapping(BEER_ORDER_PATH)
     public ResponseEntity<Void> createOrder(@RequestBody BeerOrderCreateDTO beerOrderCreateDTO) {

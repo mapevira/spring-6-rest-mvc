@@ -1,17 +1,16 @@
 package guru.springframework.spring6restmvc.services;
 
 import guru.springframework.spring6restmvc.controller.NotFoundException;
-import guru.springframework.spring6restmvc.entities.Beer;
-import guru.springframework.spring6restmvc.entities.BeerOrder;
-import guru.springframework.spring6restmvc.entities.BeerOrderLine;
-import guru.springframework.spring6restmvc.entities.Customer;
+import guru.springframework.spring6restmvc.entities.*;
 import guru.springframework.spring6restmvc.mappers.BeerOrderMapper;
 import guru.springframework.spring6restmvc.model.BeerOrderCreateDTO;
 import guru.springframework.spring6restmvc.model.BeerOrderDTO;
+import guru.springframework.spring6restmvc.model.BeerOrderUpdateDTO;
 import guru.springframework.spring6restmvc.repositories.BeerOrderRepository;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -78,6 +77,43 @@ public class BeerOrderServiceJPA implements BeerOrderService {
                 .beerOrderLines(beerOrderLines)
                 .customerRef(beerOrderCreateDTO.getCustomerRef())
                 .build());
+    }
+
+    @Override
+    public BeerOrderDTO updateOrder(final UUID beerOrderId, final BeerOrderUpdateDTO beerOrderUpdatedDTO) {
+        val order = beerOrderRepository.findById(beerOrderId).orElseThrow(NotFoundException::new);
+
+        order.setCustomer(customerRepository.findById(beerOrderUpdatedDTO.getCustomerId()).orElseThrow(NotFoundException::new));
+        order.setCustomerRef(beerOrderUpdatedDTO.getCustomerRef());
+
+        beerOrderUpdatedDTO.getBeerOrderLines().forEach(beerOrderLine -> {
+           if (beerOrderLine.getId() != null) {
+                val existingLine = order.getBeerOrderLines().stream()
+                          .filter(line -> line.getId().equals(beerOrderLine.getId()))
+                          .findFirst()
+                          .orElseThrow(NotFoundException::new);
+
+                existingLine.setBeer(beerRepository.findById(beerOrderLine.getBeerId()).orElseThrow(NotFoundException::new));
+                existingLine.setOrderQuantity(beerOrderLine.getOrderQuantity());
+                existingLine.setQuantityAllocated(beerOrderLine.getQuantityAllocated());
+           } else {
+                order.getBeerOrderLines().add(BeerOrderLine.builder()
+                        .beer(beerRepository.findById(beerOrderLine.getBeerId()).orElseThrow(NotFoundException::new))
+                        .orderQuantity(beerOrderLine.getOrderQuantity())
+                        .quantityAllocated(beerOrderLine.getQuantityAllocated())
+                        .build());
+              }
+        });
+
+        if (beerOrderUpdatedDTO.getBeerOrderShipment() != null && beerOrderUpdatedDTO.getBeerOrderShipment().getTrackingNumber() != null) {
+            if (order.getBeerOrderShipment() == null) {
+                order.setBeerOrderShipment(BeerOrderShipment.builder().trackingNumber(beerOrderUpdatedDTO.getBeerOrderShipment().getTrackingNumber()).build());
+            } else {
+                order.getBeerOrderShipment().setTrackingNumber(beerOrderUpdatedDTO.getBeerOrderShipment().getTrackingNumber());
+            }
+        }
+
+        return beerOrderMapper.beerOrderToBeerOrderDto(beerOrderRepository.save(order));
     }
 
 }
