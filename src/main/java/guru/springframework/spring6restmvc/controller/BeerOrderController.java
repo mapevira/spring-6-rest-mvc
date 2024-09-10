@@ -32,6 +32,13 @@ public class BeerOrderController {
 
     private final BeerOrderService beerOrderService;
 
+    @DeleteMapping(BEER_ORDER_PATH_ID)
+    public ResponseEntity<Void> deleteOrder(@PathVariable final UUID beerOrderId) {
+        beerOrderService.deleteOrder(beerOrderId);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping(BEER_ORDER_PATH_ID)
     public ResponseEntity<BeerOrderDTO> updateOrder(@PathVariable final UUID beerOrderId, @RequestBody BeerOrderUpdateDTO beerOrderUpdatedDTO) {
         return ResponseEntity.ok(beerOrderService.updateOrder(beerOrderId, beerOrderUpdatedDTO));
