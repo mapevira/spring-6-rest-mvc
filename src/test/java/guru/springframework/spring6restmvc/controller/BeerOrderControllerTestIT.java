@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static guru.springframework.spring6restmvc.controller.BeerControllerTest.jwtRequestPostProcessor;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -50,6 +51,21 @@ class BeerOrderControllerTestIT {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .apply(springSecurity())
                 .build();
+    }
+
+    @Test
+    void testDelete() throws Exception {
+        val beerOrder = beerOrderRepository.findAll().getFirst();
+
+        mockMvc.perform(delete(BeerOrderController.BEER_ORDER_PATH_ID, beerOrder.getId())
+                        .with(jwtRequestPostProcessor))
+                .andExpect(status().isOk());
+
+        assertThat(beerOrderRepository.findById(beerOrder.getId())).isEmpty();
+
+        mockMvc.perform(delete(BeerOrderController.BEER_ORDER_PATH_ID, beerOrder.getId())
+                        .with(jwtRequestPostProcessor))
+                .andExpect(status().isNotFound());
     }
 
     @Transactional
