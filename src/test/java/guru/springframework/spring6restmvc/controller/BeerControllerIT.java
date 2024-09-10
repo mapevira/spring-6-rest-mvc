@@ -141,7 +141,12 @@ class BeerControllerIT {
 
     @Test
     void deleteByIdFoundMVC() throws Exception {
-        Beer beer = beerRepository.findAll().get(0);
+        Beer beer = beerRepository.save(Beer.builder()
+                .beerName("New Beer")
+                        .beerStyle(BeerStyle.IPA)
+                        .upc("123123")
+                        .price(BigDecimal.TEN)
+                        .build());
 
         mockMvc.perform(delete(BeerController.BEER_PATH_ID, beer.getId())
                         .with(BeerControllerTest.jwtRequestPostProcessor)
@@ -375,8 +380,7 @@ class BeerControllerIT {
     @Transactional
     @Test
     void testEmptyList() {
-        beerRepository.deleteAll();
-        Page<BeerDTO> dtos = beerController.listBeers(null, null, false, 1, 25);
+        Page<BeerDTO> dtos = beerController.listBeers("no me puedes encontrar", null, false, 1, 25);
 
         assertThat(dtos.getContent().size()).isEqualTo(0);
     }
